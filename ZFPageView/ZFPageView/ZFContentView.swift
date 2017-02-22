@@ -21,6 +21,7 @@ class ZFContentView: UIView {
     fileprivate var childVcs : [UIViewController]
     fileprivate var parentVc : UIViewController
     fileprivate var startOffsetX : CGFloat = 0
+    fileprivate var isForbidDelegate : Bool = false
     fileprivate lazy var collectionView : UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.itemSize = self.bounds.size
@@ -112,13 +113,14 @@ extension ZFContentView: UICollectionViewDelegate {
     }
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        isForbidDelegate = false
         startOffsetX = scrollView.contentOffset.x
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         // 0. 判断有没有完成滑动
         let contentOffsetX = scrollView.contentOffset.x
-        guard contentOffsetX != startOffsetX else {
+        guard contentOffsetX != startOffsetX  && !isForbidDelegate else {
             return
         }
         
@@ -156,6 +158,9 @@ extension ZFContentView: UICollectionViewDelegate {
 // MARK:- 遵守ZFTitleViewDelegate协议
 extension ZFContentView : ZFTitleViewDelegate {
     func titleView(_ titleView: ZFTitleView, targetIndex: Int) {
+        // 0. 禁止执行代理方法
+        isForbidDelegate = true
+        
         // 1. 根据index创建indexPath
         let indexPath = IndexPath(item: targetIndex, section: 0)
         
