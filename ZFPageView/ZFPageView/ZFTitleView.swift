@@ -18,6 +18,17 @@ class ZFTitleView: UIView {
     weak var delegate : ZFTitleViewDelegate?
     fileprivate var titles : [String]
     fileprivate var style : ZFPageStyle
+    fileprivate lazy var titleLabels : [UILabel] = [UILabel]()
+    fileprivate var currentIndex : Int = 0
+    fileprivate lazy var normalRGB : (CGFloat, CGFloat, CGFloat) = self.style.normalColor.getRGBValue()
+    fileprivate lazy var selectedRGB : (CGFloat, CGFloat, CGFloat) = self.style.selectedColor.getRGBValue()
+    fileprivate lazy var deltaRGB : (CGFloat, CGFloat, CGFloat) = {
+        let deltaR = self.selectedRGB.0 - self.normalRGB.0
+        let deltaG = self.selectedRGB.1 - self.normalRGB.1
+        let deltaB = self.selectedRGB.2 - self.normalRGB.2
+        return(deltaR, deltaG, deltaB)
+    }()
+    
     fileprivate lazy var scrollView : UIScrollView = {
         let scrollView = UIScrollView(frame: self.bounds)
         scrollView.showsHorizontalScrollIndicator = false
@@ -25,8 +36,7 @@ class ZFTitleView: UIView {
         
         return scrollView
     }()
-    fileprivate lazy var titleLabels : [UILabel] = [UILabel]()
-    fileprivate var currentIndex : Int = 0
+    
     
     // MARK: 构造函数
     init(frame: CGRect, titles: [String], style: ZFPageStyle) {
@@ -156,7 +166,7 @@ extension ZFTitleView : ZFContentViewDelegate {
     func contentView(_ contentView: ZFContentView, didEndScroll inIndex: Int) {
         currentIndex = inIndex
         
-       adjustLabelPosition()
+        adjustLabelPosition()
     }
     
     func contentView(_ contentView: ZFContentView, sourceIndex: Int, targetIndex: Int, progress: CGFloat) {
@@ -165,6 +175,7 @@ extension ZFTitleView : ZFContentViewDelegate {
         let targetLabel = titleLabels[targetIndex]
         
         // 2. 颜色渐变
-        
+        sourceLabel.textColor = UIColor(r: selectedRGB.0 - deltaRGB.0 * progress, g: selectedRGB.1 - deltaRGB.1 * progress, b: selectedRGB.2 - deltaRGB.2 * progress)
+        targetLabel.textColor = UIColor(r: normalRGB.0 + deltaRGB.0 * progress, g: normalRGB.1 + deltaRGB.1 * progress, b: normalRGB.2 + deltaRGB.2 * progress)
     }
 }

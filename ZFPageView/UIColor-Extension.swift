@@ -70,3 +70,15 @@ extension UIColor {
         self.init(r: CGFloat(r), g: CGFloat(g), b: CGFloat(b))
     }
 }
+
+
+// MARK:- 从颜色中获取RGB值
+extension UIColor {
+    func getRGBValue() -> (CGFloat, CGFloat, CGFloat) {
+        guard let cmps = cgColor.components else {
+            // break/continue/return/throw
+            fatalError("错误:请确定该颜色是通过RGB创建的")
+        }
+        return (cmps[0] * 255, cmps[1] * 255, cmps[2] * 255)
+    }
+}

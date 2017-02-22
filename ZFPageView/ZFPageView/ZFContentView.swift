@@ -136,6 +136,10 @@ extension ZFContentView: UICollectionViewDelegate {
                 targetIndex = childVcs.count - 1
             }
             progress = (contentOffsetX - startOffsetX) / collectionWidth
+            
+            if (contentOffsetX - startOffsetX) == collectionWidth {
+                targetIndex = sourceIndex
+            }
         } else { // 右划
             targetIndex = Int(contentOffsetX / collectionWidth)
             sourceIndex = targetIndex + 1
