@@ -128,6 +128,15 @@ extension ZFTitleView {
         currentIndex = targetLabel.tag
         
         // 4. 调整点击label的位置,滚动到中间去
+        adjustLabelPosition()
+        
+        // 5. 通知代理
+        // 可选连: 如果可选类型有值,则执行代码,如果没有值,什么事情都不会发生
+        delegate?.titleView(self, targetIndex: currentIndex)
+    }
+    
+    fileprivate func adjustLabelPosition() {
+        let targetLabel = titleLabels[currentIndex]
         var offsetX = targetLabel.center.x - scrollView.bounds.width * 0.5
         
         if offsetX < 0 {
@@ -139,9 +148,23 @@ extension ZFTitleView {
         }
         
         scrollView.setContentOffset(CGPoint(x:offsetX, y: 0), animated: true)
+    }
+}
+
+
+extension ZFTitleView : ZFContentViewDelegate {
+    func contentView(_ contentView: ZFContentView, didEndScroll inIndex: Int) {
+        currentIndex = inIndex
         
-        // 5. 通知代理
-        // 可选连: 如果可选类型有值,则执行代码,如果没有值,什么事情都不会发生
-        delegate?.titleView(self, targetIndex: currentIndex)
+       adjustLabelPosition()
+    }
+    
+    func contentView(_ contentView: ZFContentView, sourceIndex: Int, targetIndex: Int, progress: CGFloat) {
+        // 1. 根据sourceIndex/targetIndex获取对应的label
+        let sourceLabel = titleLabels[sourceIndex]
+        let targetLabel = titleLabels[targetIndex]
+        
+        // 2. 颜色渐变
+        
     }
 }

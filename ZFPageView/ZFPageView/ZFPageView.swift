@@ -51,5 +51,6 @@ extension ZFPageView {
         
         // 3. 让titleView和contentView进行沟通
         titleView.delegate = contentView
+        contentView.delegate = titleView
     }
 }

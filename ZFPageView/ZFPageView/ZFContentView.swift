@@ -10,10 +10,17 @@ import UIKit
 
 private let kContentCellID = "kContentCellID"
 
+protocol ZFContentViewDelegate : class {
+    func contentView(_ contentView : ZFContentView, didEndScroll inIndex : Int)
+    func contentView(_ contentView : ZFContentView, sourceIndex : Int, targetIndex : Int, progress : CGFloat)
+}
+
 class ZFContentView: UIView {
     // MARK: 属性
+    weak var delegate : ZFContentViewDelegate?
     fileprivate var childVcs : [UIViewController]
     fileprivate var parentVc : UIViewController
+    fileprivate var startOffsetX : CGFloat = 0
     fileprivate lazy var collectionView : UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.itemSize = self.bounds.size
@@ -89,8 +96,55 @@ extension ZFContentView: UICollectionViewDataSource{
 
 // MARK:- 遵守UICollectionViewDelegate
 extension ZFContentView: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        scrollViewDidEndScroll()
+    }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            scrollViewDidEndScroll()
+        }
+    }
+    
+    private func scrollViewDidEndScroll() {
+        let index = Int(collectionView.contentOffset.x / collectionView.bounds.width)
+        delegate?.contentView(self, didEndScroll: index)
+    }
+    
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        startOffsetX = scrollView.contentOffset.x
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        // 0. 判断有没有完成滑动
+        let contentOffsetX = scrollView.contentOffset.x
+        guard contentOffsetX != startOffsetX else {
+            return
+        }
         
+        // 1. 定义出需要获取的变量
+        var sourceIndex = 0
+        var targetIndex = 0
+        var progress : CGFloat = 0
+        
+        // 2. 获取需要的参数
+        let collectionWidth = collectionView.bounds.width
+        if contentOffsetX > startOffsetX { // 左划
+            sourceIndex = Int(contentOffsetX / collectionWidth)
+            targetIndex = sourceIndex + 1
+            if targetIndex >= childVcs.count {
+                targetIndex = childVcs.count - 1
+            }
+            progress = (contentOffsetX - startOffsetX) / collectionWidth
+        } else { // 右划
+            targetIndex = Int(contentOffsetX / collectionWidth)
+            sourceIndex = targetIndex + 1
+            progress = (startOffsetX - contentOffsetX) / collectionWidth
+        }
+        
+//        print("sourceIndex:\(sourceIndex) targetIndex:\(targetIndex) progress:\(progress)")
+        
+        delegate?.contentView(self, sourceIndex: sourceIndex, targetIndex: targetIndex, progress: progress)
     }
 }
 
