@@ -16,4 +16,11 @@ struct ZFPageStyle {
     var titleFont : UIFont = UIFont.systemFont(ofSize: 14) // 文本字体大小
     var isScrollEnabled : Bool = false // 是否能够滚动
     var titleMargin : CGFloat = 20 // 能滚动的情况下,文字的间距
+    
+    var isShowBottomLine : Bool = true // 是否显示底部的line
+    var bottomLineColor : UIColor = UIColor.orange // 底部line的默认颜色
+    var bottomLineHeight : CGFloat = 2 // 底部line默认高度
+    
+    var isNeedScale : Bool = false // 是否需要缩放动画
+    var maxScale : CGFloat = 1.2 // 最大缩放比例
 }

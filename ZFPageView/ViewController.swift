@@ -35,6 +35,7 @@ class ViewController: UIViewController {
         // 4. 样式
         var style = ZFPageStyle()
         style.isScrollEnabled = true
+        style.isNeedScale = true
         
         // 5. 创建pageView
         let pageView = ZFPageView(frame: pageFrame, titles: titles, style: style, childVcs: childVcs, parentVc: self)

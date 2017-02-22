@@ -36,6 +36,11 @@ class ZFTitleView: UIView {
         
         return scrollView
     }()
+    fileprivate lazy var bottomLine : UIView = {
+        let bottomLine = UIView()
+        bottomLine.backgroundColor = self.style.bottomLineColor
+        return bottomLine
+    }()
     
     
     // MARK: 构造函数
@@ -63,8 +68,18 @@ extension ZFTitleView {
         // 2. 初始化所有的labels
         setupTitleLabels()
         
-        // 3. 设置所有label的frame
-        
+        // 3. 初始化底部的line
+        if style.isShowBottomLine {
+            setupBottomLine()
+        }
+    }
+    
+    
+    private func setupBottomLine() {
+        scrollView.addSubview(bottomLine)
+        bottomLine.frame = titleLabels.first!.frame
+        bottomLine.frame.size.height = style.bottomLineHeight
+        bottomLine.frame.origin.y = style.titleHeight - style.bottomLineHeight
     }
     
     private func setupTitleLabels() {
@@ -112,6 +127,11 @@ extension ZFTitleView {
         if style.isScrollEnabled {
             scrollView.contentSize = CGSize(width: titleLabels.last!.frame.maxX + style.titleMargin * 0.5, height: 0)
         }
+        
+        // 5. 设置缩放
+        if style.isNeedScale {
+            titleLabels.first?.transform = CGAffineTransform(scaleX: style.maxScale, y: style.maxScale)
+        }
     }
 }
 
@@ -143,6 +163,22 @@ extension ZFTitleView {
         // 5. 通知代理
         // 可选连: 如果可选类型有值,则执行代码,如果没有值,什么事情都不会发生
         delegate?.titleView(self, targetIndex: currentIndex)
+        
+        // 6. 调整bottomLine的位置
+        if style.isShowBottomLine {
+            UIView.animate(withDuration: 0.25, animations: {
+                self.bottomLine.frame.origin.x = targetLabel.frame.origin.x
+                self.bottomLine.frame.size.width = targetLabel.frame.width
+            })
+        }
+        
+        // 7. 调整文字的缩放
+        if style.isNeedScale {
+            UIView.animate(withDuration: 0.25, animations: { 
+                sourceLabel.transform = CGAffineTransform.identity
+                targetLabel.transform = CGAffineTransform(scaleX: self.style.maxScale, y: self.style.maxScale)
+            })
+        }
     }
     
     fileprivate func adjustLabelPosition() {
@@ -177,5 +213,20 @@ extension ZFTitleView : ZFContentViewDelegate {
         // 2. 颜色渐变
         sourceLabel.textColor = UIColor(r: selectedRGB.0 - deltaRGB.0 * progress, g: selectedRGB.1 - deltaRGB.1 * progress, b: selectedRGB.2 - deltaRGB.2 * progress)
         targetLabel.textColor = UIColor(r: normalRGB.0 + deltaRGB.0 * progress, g: normalRGB.1 + deltaRGB.1 * progress, b: normalRGB.2 + deltaRGB.2 * progress)
+        
+        // 3. 计算bottomLine的width/x变化
+        if style.isShowBottomLine {
+            let deltaWidth = targetLabel.frame.width - sourceLabel.frame.width
+            let deltaX = targetLabel.frame.origin.x - sourceLabel.frame.origin.x
+            bottomLine.frame.size.width = sourceLabel.frame.width + deltaWidth * progress
+            bottomLine.frame.origin.x = deltaX * progress + sourceLabel.frame.origin.x
+        }
+        
+        // 4. 缩放的变化
+        if style.isNeedScale {
+            let deltaScale = style.maxScale - 1.0
+            sourceLabel.transform = CGAffineTransform(scaleX: style.maxScale - deltaScale * progress, y: style.maxScale - deltaScale * progress)
+            targetLabel.transform = CGAffineTransform(scaleX: 1.0 + deltaScale * progress, y: 1.0 + deltaScale * progress)
+        }
     }
 }
