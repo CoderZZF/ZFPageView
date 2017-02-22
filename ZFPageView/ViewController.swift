@@ -20,8 +20,8 @@ class ViewController: UIViewController {
         let pageFrame = CGRect(x: 0, y: 64, width: view.bounds.width, height: view.bounds.height - 64)
         
         // 2. 获取pageView显示的标题
-//        let titles = ["推荐", "游戏", "娱乐", "趣玩"];
-        let titles = ["推荐", "游戏", "娱乐", "趣玩", "推荐", "游戏", "娱乐", "趣玩", "推荐", "游戏", "娱乐", "趣玩"];
+        let titles = ["推荐", "游戏", "娱乐", "趣玩"];
+//        let titles = ["推荐", "游戏游戏游戏", "娱游戏乐", "趣玩游戏游戏游戏游戏游戏", "推荐", "游戏", "娱乐", "趣玩", "推荐", "游戏", "娱乐", "趣玩"];
         
         // 3. 获取pageView中所有的内容控制器
         var childVcs = [UIViewController]()
@@ -34,8 +34,10 @@ class ViewController: UIViewController {
         
         // 4. 样式
         var style = ZFPageStyle()
-        style.isScrollEnabled = true
-        style.isNeedScale = true
+        style.isShowBottomLine = false
+        style.isShowCoverView = true
+//        style.isScrollEnabled = true
+//        style.isNeedScale = true
         
         // 5. 创建pageView
         let pageView = ZFPageView(frame: pageFrame, titles: titles, style: style, childVcs: childVcs, parentVc: self)

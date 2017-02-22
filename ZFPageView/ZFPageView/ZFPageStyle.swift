@@ -23,4 +23,11 @@ struct ZFPageStyle {
     
     var isNeedScale : Bool = false // 是否需要缩放动画
     var maxScale : CGFloat = 1.2 // 最大缩放比例
+    
+    var isShowCoverView : Bool = false // 默认不显示
+    var coverViewColor : UIColor = UIColor.black // 遮盖的颜色
+    var coverViewAlpha : CGFloat = 0.3 // 遮盖的透明度
+    var coverViewHeight : CGFloat = 25 // 遮盖的高度
+    var coverViewRadius : CGFloat = 12 // 圆角的大小
+    var coverViewMargin : CGFloat = 8 // 遮盖的间距
 }

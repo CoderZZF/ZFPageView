@@ -41,6 +41,12 @@ class ZFTitleView: UIView {
         bottomLine.backgroundColor = self.style.bottomLineColor
         return bottomLine
     }()
+    fileprivate lazy var coverView : UIView = {
+        let coverView = UIView()
+        coverView.backgroundColor = self.style.coverViewColor
+        coverView.alpha = self.style.coverViewAlpha
+        return coverView
+    }()
     
     
     // MARK: 构造函数
@@ -72,6 +78,30 @@ extension ZFTitleView {
         if style.isShowBottomLine {
             setupBottomLine()
         }
+        
+        // 4. 初始化遮盖的View
+        if style.isShowCoverView {
+            setupCoverView()
+        }
+    }
+    
+    private func setupCoverView() {
+        scrollView.insertSubview(coverView, at: 0)
+        
+        guard let firstLabel = titleLabels.first else { return }
+        var coverW : CGFloat = firstLabel.frame.width
+        let coverH : CGFloat = style.coverViewHeight
+        var coverX : CGFloat = firstLabel.frame.origin.x
+        let coverY : CGFloat = (firstLabel.frame.height - coverH) * 0.5
+        
+        if style.isScrollEnabled {
+            coverX -= style.coverViewMargin
+            coverW += style.coverViewMargin * 2
+        }
+        coverView.frame = CGRect(x: coverX, y: coverY, width: coverW, height: coverH)
+        
+        coverView.layer.cornerRadius = style.coverViewRadius
+        coverView.layer.masksToBounds = true
     }
     
     
@@ -179,9 +209,19 @@ extension ZFTitleView {
                 self.bottomLine.frame.size.width = targetLabel.frame.width
             })
         }
+        
+        // 8. 调整coverView的位置
+        if style.isShowCoverView {
+            UIView.animate(withDuration: 0.25, animations: {
+                self.coverView.frame.origin.x = self.style.isScrollEnabled ? targetLabel.frame.origin.x - self.style.coverViewMargin : targetLabel.frame.origin.x
+                self.coverView.frame.size.width = self.style.isScrollEnabled ? (targetLabel.frame.width + self.style.coverViewMargin * 2) : targetLabel.frame.width
+            })
+        }
     }
     
     fileprivate func adjustLabelPosition() {
+        guard style.isScrollEnabled else { return }
+        
         let targetLabel = titleLabels[currentIndex]
         var offsetX = targetLabel.center.x - scrollView.bounds.width * 0.5
         
@@ -222,11 +262,17 @@ extension ZFTitleView : ZFContentViewDelegate {
         }
         
         // 4. 计算bottomLine的width/x变化
+        let deltaWidth = targetLabel.frame.width - sourceLabel.frame.width
+        let deltaX = targetLabel.frame.origin.x - sourceLabel.frame.origin.x
         if style.isShowBottomLine {
-            let deltaWidth = targetLabel.frame.width - sourceLabel.frame.width
-            let deltaX = targetLabel.frame.origin.x - sourceLabel.frame.origin.x
             bottomLine.frame.size.width = sourceLabel.frame.width + deltaWidth * progress
             bottomLine.frame.origin.x = deltaX * progress + sourceLabel.frame.origin.x
+        }
+        
+        // 5. coverView的渐变
+        if style.isShowCoverView {
+            coverView.frame.origin.x = style.isScrollEnabled ? (sourceLabel.frame.origin.x - style.coverViewMargin) + deltaX * progress : (sourceLabel.frame.origin.x + deltaX * progress)
+            coverView.frame.size.width = style.isScrollEnabled ? (sourceLabel.frame.width + style.coverViewMargin * 2) + deltaWidth * progress : (sourceLabel.frame.width + deltaWidth * progress)
         }
     }
 }
